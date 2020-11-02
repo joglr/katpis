@@ -1,81 +1,118 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System;
+using System.Threading.Tasks;
 
 namespace kat
 {
-    class Program
-    {
+  class Program
+  {
+    const ConsoleColor FOREGROUND_COLOR = ConsoleColor.White;
+    const ConsoleColor BACKGROUND_COLOR = ConsoleColor.Black;
+    const ConsoleColor HINT_COLOR = ConsoleColor.Cyan;
+    const string COMMON_EMAIL_SUFFIXES_PATH = "email-suffixes.csv";
+    const string INPUT_PREFIX = " > ";
 
-        static Regex validCharsRegex = new Regex(@"^[A-Za-z@.+-]$");
+    static readonly ConsoleColor prevForeground = Console.ForegroundColor;
+    static readonly ConsoleColor prevBackground = Console.BackgroundColor;
+    public static string[] commonEmailSuffixes;
 
-        static void Main(string[] args)
+    static Regex validCharsRegex = new Regex(@"^[A-Za-z@.+-]$");
+
+    static async Task Main(string[] args)
     {
+      ApplyColors();
       Console.Clear();
-      // while (true) {
-      Console.ForegroundColor = ConsoleColor.Gray;
-      // Console.CursorVisible = false;
+      Console.WriteLine("Loading...");
+      commonEmailSuffixes = await LoadCommonEmailSuffices();
+      Console.Clear();
+      Console.Title = "Kat CLI";
 
-        string email = null;
+      string email = null;
 
-        do {
-            email = AcceptInput(email == null ? "What is your email?" : "Invalid email, try again");
+      do
+      {
+        email = AcceptInput(message: email == null
+          ? "Please enter your email to continue"
+          : "Invalid email, try again");
+      } while (!VerifyEmail(email: email));
 
-        } while(!VerifyEmail(email));
+      Console.WriteLine(email);
+      Console.ForegroundColor = prevForeground;
+      Console.BackgroundColor = prevBackground;
+    }
 
-        Console.WriteLine();
+    private static async Task<string[]> LoadCommonEmailSuffices()
+    {
+      return await File.ReadAllLinesAsync(COMMON_EMAIL_SUFFIXES_PATH);
+    }
 
-        // Console.Beep();d
-        // Console.Clear();
-        System.Console.WriteLine(email);
-        // System.Environment.Exit(0);
-        // }
+
+
+    private static void ApplyColors(
+      ConsoleColor foregroundColor = FOREGROUND_COLOR,
+      ConsoleColor backgroundColor = BACKGROUND_COLOR
+    )
+    {
+      Console.ForegroundColor = foregroundColor;
+      Console.BackgroundColor = backgroundColor;
     }
 
     private static bool VerifyEmail(string email)
     {
-        string[] parts = email.Split("@");
-        return email.Contains("@") && parts[1].Contains(".");
+      string[] parts = email.Split("@");
+      return email.Contains("@") && parts[1].Contains(".");
     }
 
     private static string AcceptInput(string message)
     {
       string status = "";
       string text = "";
-      string prediction = "";
+      string prediction = null;
 
-      while (true)
+      bool enterPressed = false;
+
+      while (!enterPressed)
       {
-        // if (text.Length > 10) break;
-        Console.Clear();
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.BackgroundColor = ConsoleColor.Black;
+        ApplyColors();
         Console.WriteLine(message);
-        Console.Write(" > ");
+        Console.Write(INPUT_PREFIX);
         Console.Write(text);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.Write(prediction);
+        ApplyColors(foregroundColor: ConsoleColor.DarkGray);
+        if (prediction != null)
+        {
+          Console.Write(prediction);
+          ApplyColors(HINT_COLOR);
+          Console.Write(" (press tab to autocomplete)");
+          Console.SetCursorPosition(INPUT_PREFIX.Length + text.Length, 1);
+        }
+        ApplyColors();
         ConsoleKeyInfo cki = Console.ReadKey();
+        Console.Clear();
 
-        if (cki.Key.Equals(ConsoleKey.Backspace))
+        switch (cki.Key)
         {
-          if (text.Length > 0)
-          {
-            status = "backspace";
-            text = text.Substring(0, text.Length - 1);
-          }
-        }
-        if (cki.Key.Equals(ConsoleKey.Enter))
-        {
-          break;
-        }
-        if (cki.Key.Equals(ConsoleKey.Tab))
-        {
-          if (prediction.Length > 0)
-          {
-            text += prediction;
-            prediction = "";
-          }
+          case ConsoleKey.Backspace:
+            if (text.Length > 0)
+            {
+              status = "backspace";
+              text = text.Substring(0, text.Length - 1);
+            }
+            break;
+
+          case ConsoleKey.Enter:
+            enterPressed = true;
+            break;
+          case ConsoleKey.Tab:
+            if (prediction.Length > 0)
+            {
+              text += prediction;
+              prediction = null;
+            }
+            break;
+          default:
+            break;
         }
 
         if (validCharsRegex.IsMatch(cki.KeyChar.ToString()))
@@ -84,11 +121,35 @@ namespace kat
           text += cki.KeyChar;
         }
         else status = "non-allowed character or other key: " + cki.Key.ToString();
-        if (text.EndsWith("@g"))
+
+        prediction = null;
+
+        if (text.Contains("@"))
         {
-          prediction = "mail.com";
+          var parts = text.Split("@");
+          if (parts.Length.Equals(2))
+          {
+            var server = parts[1];
+            if (server.Length > 0)
+            {
+
+              foreach (var item in commonEmailSuffixes)
+              {
+                if (item.StartsWith(server) && item.Contains(server) && !item.Equals(server))
+                {
+                  prediction = item.Substring(server.Length);
+                  break;
+                }
+              }
+            }
+          }
         }
-        else prediction = "";
+
+        // if (text.EndsWith("@g"))
+        // {
+        //   prediction = "mail.com";
+        // }
+        // else prediction = null;
       }
 
       return text;
