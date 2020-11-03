@@ -1,54 +1,48 @@
-﻿using System.IO;
+﻿using System.Net.Mail;
+using System.IO;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
+using static System.ConsoleColor;
 
 namespace kat
 {
   class Program
   {
-    const ConsoleColor FOREGROUND_COLOR = ConsoleColor.White;
-    const ConsoleColor BACKGROUND_COLOR = ConsoleColor.Black;
-    const ConsoleColor HINT_COLOR = ConsoleColor.Cyan;
-    const string COMMON_EMAIL_SUFFIXES_PATH = "email-suffixes.csv";
-    const string INPUT_PREFIX = " > ";
+    const ConsoleColor FOREGROUND_COLOR = White;
+    const ConsoleColor BACKGROUND_COLOR = Black;
+    const ConsoleColor HINT_COLOR = Cyan;
+    const ConsoleColor PREDICTION_COLOR = DarkGray;
+    const string COMMON_EMAIL_SUFFIXES_PATH = @"Resources\email-suffixes.csv";
+    const string validCharsPattern = @"^\S$";
 
-    static readonly ConsoleColor prevForeground = Console.ForegroundColor;
-    static readonly ConsoleColor prevBackground = Console.BackgroundColor;
     public static string[] commonEmailSuffixes;
 
-    static Regex validCharsRegex = new Regex(@"^[A-Za-z@.+-]$");
 
     static async Task Main(string[] args)
     {
-      ApplyColors();
-      Console.Clear();
-      Console.WriteLine("Loading...");
-      commonEmailSuffixes = await LoadCommonEmailSuffices();
-      Console.Clear();
+
+      Util.Colored(() => Console.Write("Loading..."));
+      ClearCurrentConsoleLine();
+      commonEmailSuffixes = await File.ReadAllLinesAsync(COMMON_EMAIL_SUFFIXES_PATH);
       Console.Title = "Kat CLI";
 
       string email = null;
 
       do
       {
-        email = AcceptInput(message: email == null
-          ? "Please enter your email to continue"
-          : "Invalid email, try again");
+        ClearCurrentConsoleLine();
+        Util.Colored(() =>
+        {
+          email = AcceptInput(message: email == null
+              ? "Enter your email: "
+              : "Invalid email, try again");
+        });
       } while (!VerifyEmail(email: email));
 
+      ClearCurrentConsoleLine();
       Console.WriteLine(email);
-      Console.ForegroundColor = prevForeground;
-      Console.BackgroundColor = prevBackground;
     }
-
-    private static async Task<string[]> LoadCommonEmailSuffices()
-    {
-      return await File.ReadAllLinesAsync(COMMON_EMAIL_SUFFIXES_PATH);
-    }
-
-
 
     private static void ApplyColors(
       ConsoleColor foregroundColor = FOREGROUND_COLOR,
@@ -61,11 +55,28 @@ namespace kat
 
     private static bool VerifyEmail(string email)
     {
-      string[] parts = email.Split("@");
-      return email.Contains("@") && parts[1].Contains(".");
+      if (email.Length == 0) return false;
+      try
+      {
+        var validsEmail = new MailAddress(email).Address;
+      }
+      catch (FormatException)
+      {
+        return false;
+      }
+      return true;
     }
 
-    private static string AcceptInput(string message)
+    public static void ClearCurrentConsoleLine()
+    {
+      int currentLineCursor = Console.CursorTop;
+      Console.SetCursorPosition(0, Console.CursorTop);
+      for (int i = 0; i < Console.WindowWidth; i++)
+        Console.Write(" ");
+      Console.SetCursorPosition(0, currentLineCursor);
+    }
+
+    private static string AcceptInput(string message, String acceptedCharsPattern = validCharsPattern)
     {
       string status = "";
       string text = "";
@@ -75,21 +86,22 @@ namespace kat
 
       while (!enterPressed)
       {
-        ApplyColors();
-        Console.WriteLine(message);
-        Console.Write(INPUT_PREFIX);
-        Console.Write(text);
-        ApplyColors(foregroundColor: ConsoleColor.DarkGray);
+
+        Util.Colored(() =>
+        {
+          ClearCurrentConsoleLine();
+          Console.Write(message);
+          Console.Write(text);
+        });
+
         if (prediction != null)
         {
-          Console.Write(prediction);
-          ApplyColors(HINT_COLOR);
-          Console.Write(" (press tab to autocomplete)");
-          Console.SetCursorPosition(INPUT_PREFIX.Length + text.Length, 1);
+          var cl = Console.CursorLeft;
+          var ct = Console.CursorTop;
+          Util.Colored(() => Console.Write(prediction), foregroundColor: PREDICTION_COLOR);
+          Console.SetCursorPosition(cl, ct);
         }
-        ApplyColors();
         ConsoleKeyInfo cki = Console.ReadKey();
-        Console.Clear();
 
         switch (cki.Key)
         {
@@ -104,23 +116,32 @@ namespace kat
           case ConsoleKey.Enter:
             enterPressed = true;
             break;
+
           case ConsoleKey.Tab:
-            if (prediction.Length > 0)
+            if (prediction != null)
             {
               text += prediction;
               prediction = null;
             }
             break;
+
+          case ConsoleKey.UpArrow:
+          case ConsoleKey.DownArrow:
+          case ConsoleKey.LeftArrow:
+          case ConsoleKey.RightArrow:
+
+            break;
+
           default:
+            if (new Regex(validCharsPattern).IsMatch(cki.KeyChar.ToString()))
+            {
+              status = "legal character: \"" + cki.KeyChar + "\"";
+              text += cki.KeyChar;
+              text = text.Trim();
+            }
+            else status = "non-allowed character or other key: " + cki.Key.ToString();
             break;
         }
-
-        if (validCharsRegex.IsMatch(cki.KeyChar.ToString()))
-        {
-          status = "legal character";
-          text += cki.KeyChar;
-        }
-        else status = "non-allowed character or other key: " + cki.Key.ToString();
 
         prediction = null;
 
@@ -132,7 +153,6 @@ namespace kat
             var server = parts[1];
             if (server.Length > 0)
             {
-
               foreach (var item in commonEmailSuffixes)
               {
                 if (item.StartsWith(server) && item.Contains(server) && !item.Equals(server))
@@ -144,12 +164,6 @@ namespace kat
             }
           }
         }
-
-        // if (text.EndsWith("@g"))
-        // {
-        //   prediction = "mail.com";
-        // }
-        // else prediction = null;
       }
 
       return text;
