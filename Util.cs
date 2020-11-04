@@ -6,21 +6,19 @@ namespace kat
 {
   class ConsoleUtils
   {
-    const ConsoleColor FOREGROUND_COLOR = White;
-    const ConsoleColor BACKGROUND_COLOR = Black;
     const ConsoleColor PREDICTION_COLOR = DarkGray;
     public static readonly Func<string, string> emptyPredictor = _ => "";
 
     public static void Colored(
       Action act,
-      ConsoleColor foregroundColor = FOREGROUND_COLOR,
-      ConsoleColor backgroundColor = BACKGROUND_COLOR
+      ConsoleColor? foregroundColor = null,
+      ConsoleColor? backgroundColor = null
     )
     {
       ConsoleColor prevForeground = Console.ForegroundColor;
       ConsoleColor prevBackground = Console.BackgroundColor;
-      Console.ForegroundColor = foregroundColor;
-      Console.BackgroundColor = backgroundColor;
+      Console.ForegroundColor = foregroundColor == null ? Console.ForegroundColor : (ConsoleColor)foregroundColor;
+      Console.BackgroundColor = backgroundColor == null ? Console.BackgroundColor : (ConsoleColor)backgroundColor;
       act();
       Console.ForegroundColor = prevForeground;
       Console.BackgroundColor = prevBackground;
@@ -71,10 +69,9 @@ namespace kat
           ConsoleUtils.Colored(() => Console.Write(prediction), foregroundColor: PREDICTION_COLOR);
           Console.SetCursorPosition(cl, ct);
         }
-        ConsoleKeyInfo cki = Console.ReadKey(true);
 
+        ConsoleKeyInfo cki = Console.ReadKey(true);
         // Terminate program on Ctrl + C
-        Console.TreatControlCAsInput = true;
         if (cki.Modifiers.HasFlag(ConsoleModifiers.Control))
         {
           if (cki.Key.Equals(ConsoleKey.C))

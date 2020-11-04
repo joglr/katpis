@@ -1,4 +1,4 @@
-﻿using System.Net.Mail;
+using System.Net.Mail;
 using System.IO;
 using System;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ namespace kat
 
     public static Func<string, string> emailPredicter = text =>
     {
-      if (text.Contains("@") && (text.Split("@").Length > 1))
+      if (text.Contains("@"))
       {
         var parts = text.Split("@");
         if (parts.Length.Equals(2))
@@ -41,6 +41,9 @@ namespace kat
 
     static async Task Main(string[] args)
     {
+
+
+      Console.TreatControlCAsInput = true;
       ConsoleUtils.Colored(() => Console.Write("Loading..."));
       ConsoleUtils.ClearCurrentConsoleLine();
       commonEmailSuffixes = await File.ReadAllLinesAsync(COMMON_EMAIL_SUFFIXES_PATH);
