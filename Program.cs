@@ -18,7 +18,7 @@ namespace kat
 
     public static Func<string, string> emailPredicter = text =>
     {
-      if (text.Contains("@"))
+      if (text.Contains("@") && (text.Split("@").Length > 1))
       {
         var parts = text.Split("@");
         if (parts.Length.Equals(2))
