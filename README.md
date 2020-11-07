@@ -1,4 +1,6 @@
-# KAT.EXE
+# Katpis
+
+A command-line interface for kattis.com
 
 ## Useful commands:
 
