@@ -1,6 +1,6 @@
 # Katpis
 
-A commandline tool for kattis.com
+A command line tool for kattis.com
 
 ## Useful commands:
 
