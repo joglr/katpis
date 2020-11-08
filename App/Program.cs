@@ -6,17 +6,26 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Net;
 using System.IO.Compression;
+using System.Json;
+using System.Net.Http;
 
 namespace Tester
 {
     class Program
     {
-        static void Main(string[] args)
+        static async System.Threading.Tasks.Task Main(string[] args)
         {
             if (args.Length == 0) {
                 //TODO print commands and options
             } else if (args.Length >= 1) {
                 switch (args[0]){
+                    case "submit":
+                        if (args.Length == 2){
+                            await runSubmitAsync(args[1]);
+                        } else {
+                            Console.WriteLine("submit takes 1 more argument, <filename>, e.g.: hello.java");
+                        }
+                        break;
                     case "test":
                         runTest();
                         break;
@@ -24,14 +33,14 @@ namespace Tester
                         if (args.Length == 2){
                             runFetch(args[1]);
                         } else {
-                            Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname>");
+                            Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname> e.g.: hello.java");
                         }
                         break;
                     case "template":
                         if (args.Length == 2) {
                             runTemplate(args[1]);
                         } else {
-                            Console.WriteLine("template takes 1 more argument, <filename>");
+                            Console.WriteLine("template takes 1 more argument, <filename>, e.g.: hello.java");
                         }
                         break;
                     default:
@@ -41,7 +50,110 @@ namespace Tester
             }
         }
 
-        private static void runTemplate(string filename)
+        private static async System.Threading.Tasks.Task runSubmitAsync(string filename)
+        {
+            string configPath = ".kattisrc"; //TODO this path points to dir where you call katpis, change this to some absolute path
+            Dictionary<string, Dictionary<string, string>> configObject = ParseConfigFile(configPath);
+
+            string loginurl = configObject["kattis"]["loginurl"];
+            string submissionurl = configObject["kattis"]["submissionurl"];
+            string submissionsurl = configObject["kattis"]["submissionsurl"];
+            var contentObject = new Dictionary<string,string>
+            {
+                { "user", configObject["user"]["username"]},
+                { "script", "true"},
+                { "token", configObject["user"]["token"]},
+                { "User-Agent", "kattis-cli-submit" },
+            };
+            var content = new FormUrlEncodedContent(contentObject);
+
+            HttpClient client = new HttpClient();
+
+            var loginResponse = await client.PostAsync(loginurl, content);
+            Console.WriteLine(loginResponse.StatusCode);
+            // var sessionCookie = loginResponse.Headers.GetValues("Set-Cookie").Where(x => x.Contains("EduSiteCookie")).First().Split(";").First();
+
+            var loginResponseString = await loginResponse.Content.ReadAsStringAsync();
+
+            Console.WriteLine(loginResponseString);
+
+            // Status
+            contentObject = new Dictionary<string,string>
+            {
+                { "user", configObject["user"]["username"]},
+                { "script", "true"},
+                { "token", configObject["user"]["token"]},
+                { "User-Agent", "kattis-cli-submit" },
+            };
+            content = new FormUrlEncodedContent(contentObject);
+
+
+            // TODO submit file to kattis
+
+            // string data = @"{
+            //     'submit': 'true',
+            //     'submit_ctr': 2,
+            //     'language': 'Java,
+            //     'mainclass': 'Tetris',
+            //     'problem': 'tetris',
+            //     'script': 'true',
+            // }";
+
+            // string submissionFiles = "{('sub_file[]', ('Tetris.java', '// some file content', 'application/octet-stream'))}";
+
+            // submitReply = post(submitUrl, data=data, files=submissionFiles, cookies=loginReply.cookies, headers=headers);
+
+
+            var submissionid = "6372563"; // TODO get from submission response
+            var statusurl = $"{submissionsurl}/{submissionid}?json";
+            var statusResponse = await client.PostAsync(statusurl, content);
+            var statusResponseString = await statusResponse.Content.ReadAsStringAsync();
+            JsonValue status = JsonObject.Parse(statusResponseString);
+
+            // Console.WriteLine(statusResponseString);
+
+            MatchCollection mc = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
+            string numOfTestcases = "Unknown";
+            if (mc.Count > 0) {
+                numOfTestcases = mc[0].Groups[1].ToString();
+            }
+
+            Console.WriteLine(status["status_id"].ToString());
+            Console.WriteLine(status["testcase_index"].ToString() + " of " + numOfTestcases);
+        }
+
+        private static Dictionary<string, Dictionary<string, string>> ParseConfigFile(string configPath)
+        {
+            var sr = new StreamReader(configPath);
+            var configObject = new Dictionary<string, Dictionary<string, string>>();
+            while (sr.Peek() >= 0)
+            {
+                string line = sr.ReadLine();
+                MatchCollection mc = Regex.Matches(line, @"\[(.+)\]", RegexOptions.Multiline);
+                if (mc.Count >= 1)
+                {
+                    Match m = mc[0];
+                    string sectionName = m.Groups[1].ToString();
+                    var section = new Dictionary<string, string>();
+                    configObject.Add(sectionName, section);
+
+                    while (sr.Peek() >= 0)
+                    {
+                        line = sr.ReadLine();
+                        mc = Regex.Matches(line, @"^(.+): (.+)$", RegexOptions.Multiline);
+                        if (mc.Count <= 0) break;
+                        m = mc[0];
+                        string key = m.Groups[1].ToString();
+                        string val = m.Groups[2].ToString();
+                        configObject[sectionName].Add(key, val);
+                    }
+                }
+            }
+
+            return configObject;
+        }
+
+        public static void runTemplate(string filename)
         {
             string pattern = @".java$";
             string input = filename;
@@ -131,71 +243,71 @@ public class {className} {{
             // 3. Run program with in files
             
             foreach (string inFile in inFiles)
-      {
-        string command = "java " + programPath + " < " + inFile;
+            {
+                string command = "java " + programPath + " < " + inFile;
 
-        // 4. Get result
-        // 5. Read output of program
-        List<string> actualOutput = RunTestCommand(command);        
+                // 4. Get result
+                // 5. Read output of program
+                List<string> actualOutput = RunTestCommand(command);        
 
-        string ansFile = inFile.Replace(".in", ".ans");
-        if (!ansFiles.Contains(ansFile)) throw new FileNotFoundException(
-            "Could not find " + ansFile.Split(@"\").Last() + " in the current directory"
-        );
+                string ansFile = inFile.Replace(".in", ".ans");
+                if (!ansFiles.Contains(ansFile)) throw new FileNotFoundException(
+                    "Could not find " + ansFile.Split(@"\").Last() + " in the current directory"
+                );
 
-        string inFileName = inFile.Split(@"\").Last();
-        string ansFileName = ansFile.Split(@"\").Last();
+                string inFileName = inFile.Split(@"\").Last();
+                string ansFileName = ansFile.Split(@"\").Last();
 
-        // 6. Compare to .ans file(s)
-        List<string> expectedOutput = File.ReadLines(ansFile).ToList();
+                // 6. Compare to .ans file(s)
+                List<string> expectedOutput = File.ReadAllLines(ansFile).ToList();
 
-        // 7. Output differences or accepted
+                // 7. Output differences or accepted
 
-        actualOutput = TrimTrailingWhiteSpace(actualOutput);
-        expectedOutput = TrimTrailingWhiteSpace(expectedOutput);
+                actualOutput = TrimTrailingWhiteSpace(actualOutput);
+                expectedOutput = TrimTrailingWhiteSpace(expectedOutput);
 
-        string testName = inFileName.Replace(".in", "");
-        if (IsEqual(actualOutput, expectedOutput)) {
-            Console.WriteLine("Test " + testName + " Passed");
-        } else {
-            Console.WriteLine("Test " + testName + " Failed");
-            Console.WriteLine("Expected output for " + ansFileName + " :");
-            foreach (string line in expectedOutput) Console.WriteLine(line);
-            Console.WriteLine("Program output for " + inFileName + " :");
-            foreach (string line in actualOutput) Console.WriteLine(line);
-        }
+                string testName = inFileName.Replace(".in", "");
+                if (IsEqual(actualOutput, expectedOutput)) {
+                    Console.WriteLine("Test " + testName + " Passed");
+                } else {
+                    Console.WriteLine("Test " + testName + " Failed");
+                    Console.WriteLine("Expected output for " + ansFileName + " :");
+                    foreach (string line in expectedOutput) Console.WriteLine(line);
+                    Console.WriteLine("Program output for " + inFileName + " :");
+                    foreach (string line in actualOutput) Console.WriteLine(line);
+                }
 
-      }
-
-    }
-
-    private static bool IsEqual(List<string> actualOutput, List<string> expectedOutput)
-    {
-        // if (actualOutput.Count != expectedOutput.Count) return false;
-        for (int i = 0; i < expectedOutput.Count - 1; i++)
-        {
-            if (actualOutput[i] != expectedOutput[i]) return false;
-        }
-        return true;
-    }
-
-    private static List<string> TrimTrailingWhiteSpace(List<string> outputLines)
-    {
-        for (int i = outputLines.Count - 1; i >= 0; i--)
-        {
-            if (outputLines[i] == null) {
-                outputLines.RemoveRange(i,1);
-            } else {
-                string pattern = @"^\s+$";
-                string input = outputLines[i];
-                RegexOptions options = RegexOptions.Multiline;
-                if (Regex.Matches(input, pattern, options).Count() > 0) outputLines.RemoveRange(i,1);
             }
-        }
-        return outputLines;
-    }
 
-    static List<string> RunTestCommand(string command)
+        }
+
+        private static bool IsEqual(List<string> actualOutput, List<string> expectedOutput)
+        {
+            // if (actualOutput.Count != expectedOutput.Count) return false;
+            for (int i = 0; i < expectedOutput.Count - 1; i++)
+            {
+                if (actualOutput[i] != expectedOutput[i]) return false;
+            }
+            return true;
+        }
+
+        private static List<string> TrimTrailingWhiteSpace(List<string> outputLines)
+        {
+            for (int i = outputLines.Count - 1; i >= 0; i--)
+            {
+                if (outputLines[i] == null) {
+                    outputLines.RemoveRange(i,1);
+                } else {
+                    string pattern = @"^\s+$";
+                    string input = outputLines[i];
+                    RegexOptions options = RegexOptions.Multiline;
+                    if (Regex.Matches(input, pattern, options).Count() > 0) outputLines.RemoveRange(i,1);
+                }
+            }
+            return outputLines;
+        }
+
+        static List<string> RunTestCommand(string command)
         {
             var processInfo = new ProcessStartInfo("cmd.exe", "/c " + command);
             processInfo.CreateNoWindow = true;
