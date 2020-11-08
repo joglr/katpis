@@ -6,7 +6,7 @@ A command-line interface for kattis.com
 
 Clone this repository
 
-Add the root of this folder to your enviroment variables e.g.: `C:\\Users\myuser\somefolder\katpis`
+Add the root of this folder to your path enviroment variables e.g.: `C:\\Users\myuser\somefolder\katpis`
 
 Now you can run the command `katpis` anywhere!
 
