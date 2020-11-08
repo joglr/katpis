@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Net;
+using System.IO.Compression;
 
 namespace Tester
 {
@@ -11,10 +13,26 @@ namespace Tester
     {
         static void Main(string[] args)
         {
-            if (args.Length >= 1) {
+            if (args.Length == 0) {
+                //TODO print commands and options
+            } else if (args.Length >= 1) {
                 switch (args[0]){
                     case "test":
-                        commandTest();
+                        runTest();
+                        break;
+                    case "fetch":
+                        if (args.Length == 2){
+                            runFetch(args[1]);
+                        } else {
+                            Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname>");
+                        }
+                        break;
+                    case "template":
+                        if (args.Length == 2) {
+                            runTemplate(args[1]);
+                        } else {
+                            Console.WriteLine("template takes 1 more argument, <filename>");
+                        }
                         break;
                     default:
                         Console.WriteLine("Unknown first argument" + args[0]);
@@ -23,9 +41,64 @@ namespace Tester
             }
         }
 
-        public static void commandTest()
+        private static void runTemplate(string filename)
         {
-            Console.WriteLine("Testing");
+            string pattern = @".java$";
+            string input = filename;
+            if (Regex.Matches(input, pattern).Count() == 1) {
+                string className = filename.Split(".").First();
+                string javaPattern = $@"import java.util.Scanner;
+import java.io.*;
+import java.util.StringTokenizer;
+
+public class {className} {{
+    public static void main(String[] args) throws IOException {{
+        var reader = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(reader.readLine());
+        int N = Integer.parseInt(st.nextToken());
+        for (int i = 0; i < N; i++) {{
+            String[] line = reader.readLine().split("" "");
+        }}
+        System.out.println(""Output"");
+    }}
+}}";
+                File.WriteAllText(filename, javaPattern);
+            } else {
+                Console.WriteLine($"filename: {filename} doesn't end with any of the supported file extensions: [ .java ]");
+            }
+        }
+
+        public static void runFetch(string problemName)
+        {
+
+            Console.WriteLine("Fetching...");
+            
+            string cd = System.Environment.CurrentDirectory;
+
+            string url = $"https://open.kattis.com/problems/{problemName}/file/statement/samples.zip";
+
+            string zipPath = $@"{cd}\samples.zip";
+
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(url, zipPath);
+            }
+
+            try {
+                ZipFile.ExtractToDirectory(zipPath, cd);
+            } catch (IOException err) {
+                Console.WriteLine(
+                    $"Filename conflict with one or more of the sample files, '{err.Message.Split(@"\").Last()} Please remove existing files with this name from the current directory."
+                    // Todo display all conflicts, and give option to override
+                );
+            }
+            File.Delete(zipPath);
+
+        }
+
+        public static void runTest()
+        {
+            Console.WriteLine("Test...");
             string cd = System.Environment.CurrentDirectory;
 
             // 1. Reads .in file(s) from tests
