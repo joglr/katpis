@@ -12,23 +12,23 @@ Now you can run the command `katpis` anywhere!
 
 ## Avalible commands
 
-### `katpis submit <filename-with-extension>`
+### `submit <filename-with-extension>`
 
 This command is a work in progress
 
 Example: `katpis submit hello.java`
 
-### `katpis test`
+### `test`
 
 Finds a .java file in the current directory with a .java file extension, runs it with any .in files, and compares the output with any .ans files in the directory.
 
-### `katpis fetch <kattis-problem-shortname>`
+### `fetch <kattis-problem-shortname>`
 
 Example: For the problem "Hello World!" at open.kattis.com/problems/hello
 
 Run `katpis fetch hello`, and if there is sample files avalible, they will be downloaded to the current directory.
 
-### `katpis template <filename-with-extension>`
+### `template <filename-with-extension>`
 
 Example: `katpis template Hello.java`, will generate a java file with some parsing template content, to the current directory.
 
