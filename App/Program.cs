@@ -106,17 +106,16 @@ namespace Tester
             }
             Match m = mc[0];
             string submissionid = m.Groups[1].ToString();
+            Console.WriteLine("Submission successful.");
 
             // Login again
-            Console.WriteLine("Loggin in again..");
             client = new HttpClient();
 
             loginResponse = await client.PostAsync(loginurl, content);
-            Console.WriteLine(loginResponse.StatusCode);
             loginResponseString = await loginResponse.Content.ReadAsStringAsync();
 
             // Status
-            Console.WriteLine("getting status...");
+            Console.WriteLine("Getting status...");
             contentObject = new Dictionary<string,string>
             {
                 { "user", configObject["user"]["username"]},
@@ -139,6 +138,7 @@ namespace Tester
                     numOfTestcases = mc[0].Groups[1].ToString();
                 }
 
+                statusIdTracker = status["status_id"];
                 Console.WriteLine(
                     "Status: " + 
                     GetMessageFromStatusID(status["status_id"]) +
@@ -149,7 +149,6 @@ namespace Tester
                     numOfTestcases
                 );
 
-                statusIdTracker = status["status_id"];
                 Thread.Sleep(500);
             }
         }
@@ -160,6 +159,8 @@ namespace Tester
             {
                 case 0:
                     return "New";
+                case 3:
+                    return "Unknown status(Maybe quick accept / spam protection)";
                 case 5:
                     return "Running";
                 case 8:
@@ -173,7 +174,7 @@ namespace Tester
                 case 16:
                     return "Accepted";
                 default:
-                    return "Status id unknown" + statusid;
+                    return "Unknown status id";
             }
             
         }
