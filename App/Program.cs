@@ -8,6 +8,7 @@ using System.Net;
 using System.IO.Compression;
 using System.Json;
 using System.Net.Http;
+using System.Threading;
 
 namespace Tester
 {
@@ -55,6 +56,7 @@ namespace Tester
             string configPath = ".kattisrc"; //TODO this path points to dir where you call katpis, change this to some absolute path
             Dictionary<string, Dictionary<string, string>> configObject = ParseConfigFile(configPath);
 
+            // Login
             string loginurl = configObject["kattis"]["loginurl"];
             string submissionurl = configObject["kattis"]["submissionurl"];
             string submissionsurl = configObject["kattis"]["submissionsurl"];
@@ -77,7 +79,44 @@ namespace Tester
 
             Console.WriteLine(loginResponseString);
 
+            // TODO submit file to kattis
+            Console.WriteLine("submitting...");
+            
+            var form = new MultipartFormDataContent();
+            form.Add(new StringContent(configObject["user"]["username"]), "user");
+            form.Add(new StringContent(configObject["user"]["token"]), "token");
+            form.Add(new StringContent("kattis-cli-submit"), "User-Agent");
+            form.Add(new StringContent("true"), "submit");
+            form.Add(new StringContent("2"), "submit_ctr");
+            form.Add(new StringContent("Java"), "language");
+            form.Add(new StringContent("Tetris"), "mainclass");
+            form.Add(new StringContent("tetris"), "problem");
+            form.Add(new StringContent("true"), "script");
+            string cd = System.Environment.CurrentDirectory;
+            string[] files = Directory.GetFiles(cd);
+            string filePath = files.First(x => x.EndsWith(filename));
+            var fileBytes = File.ReadAllBytes(filePath);
+            form.Add(new ByteArrayContent(fileBytes, 0, fileBytes.Length), "sub_file[]", filename);
+            HttpResponseMessage submitResponse = await client.PostAsync(submissionurl, form);
+            string submitResponseString = await submitResponse.Content.ReadAsStringAsync();
+            MatchCollection mc = Regex.Matches(submitResponseString, @"Submission ID: (\d+)", RegexOptions.Multiline);
+            if (mc.Count <= 0) {
+                Console.WriteLine("A submission id could not be found");
+                return;
+            }
+            Match m = mc[0];
+            string submissionid = m.Groups[1].ToString();
+
+            // Login again
+            Console.WriteLine("Loggin in again..");
+            client = new HttpClient();
+
+            loginResponse = await client.PostAsync(loginurl, content);
+            Console.WriteLine(loginResponse.StatusCode);
+            loginResponseString = await loginResponse.Content.ReadAsStringAsync();
+
             // Status
+            Console.WriteLine("getting status...");
             contentObject = new Dictionary<string,string>
             {
                 { "user", configObject["user"]["username"]},
@@ -87,39 +126,56 @@ namespace Tester
             };
             content = new FormUrlEncodedContent(contentObject);
 
+            int statusIdTracker = 0;
+            while (statusIdTracker == 0 || statusIdTracker == 5) {
+                string statusurl = $"{submissionsurl}/{submissionid}?json";
+                HttpResponseMessage statusResponse = await client.PostAsync(statusurl, content);
+                string statusResponseString = await statusResponse.Content.ReadAsStringAsync();
+                JsonValue status = JsonObject.Parse(statusResponseString);
 
-            // TODO submit file to kattis
+                mc = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
+                string numOfTestcases = "Unknown";
+                if (mc.Count > 0) {
+                    numOfTestcases = mc[0].Groups[1].ToString();
+                }
 
-            // string data = @"{
-            //     'submit': 'true',
-            //     'submit_ctr': 2,
-            //     'language': 'Java,
-            //     'mainclass': 'Tetris',
-            //     'problem': 'tetris',
-            //     'script': 'true',
-            // }";
+                Console.WriteLine(
+                    "Status: " + 
+                    GetMessageFromStatusID(status["status_id"]) +
+                    $" [{status["status_id"]}]" + 
+                    " on testcase " + 
+                    status["testcase_index"].ToString() + 
+                    " of " + 
+                    numOfTestcases
+                );
 
-            // string submissionFiles = "{('sub_file[]', ('Tetris.java', '// some file content', 'application/octet-stream'))}";
-
-            // submitReply = post(submitUrl, data=data, files=submissionFiles, cookies=loginReply.cookies, headers=headers);
-
-
-            var submissionid = "6372563"; // TODO get from submission response
-            var statusurl = $"{submissionsurl}/{submissionid}?json";
-            var statusResponse = await client.PostAsync(statusurl, content);
-            var statusResponseString = await statusResponse.Content.ReadAsStringAsync();
-            JsonValue status = JsonObject.Parse(statusResponseString);
-
-            // Console.WriteLine(statusResponseString);
-
-            MatchCollection mc = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
-            string numOfTestcases = "Unknown";
-            if (mc.Count > 0) {
-                numOfTestcases = mc[0].Groups[1].ToString();
+                statusIdTracker = status["status_id"];
+                Thread.Sleep(500);
             }
+        }
 
-            Console.WriteLine(status["status_id"].ToString());
-            Console.WriteLine(status["testcase_index"].ToString() + " of " + numOfTestcases);
+        private static string GetMessageFromStatusID(int statusid)
+        {
+            switch (statusid)
+            {
+                case 0:
+                    return "New";
+                case 5:
+                    return "Running";
+                case 8:
+                    return "Compile Error";
+                case 9:
+                    return "Runtime Error";
+                case 12:
+                    return "Time Limit Exceeded";
+                case 14:
+                    return "Wrong Answer";
+                case 16:
+                    return "Accepted";
+                default:
+                    return "Status id unknown" + statusid;
+            }
+            
         }
 
         private static Dictionary<string, Dictionary<string, string>> ParseConfigFile(string configPath)
