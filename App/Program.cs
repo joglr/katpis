@@ -89,8 +89,8 @@ namespace Tester
             form.Add(new StringContent("true"), "submit");
             form.Add(new StringContent("2"), "submit_ctr");
             form.Add(new StringContent("Java"), "language");
-            form.Add(new StringContent("Tetris"), "mainclass");
-            form.Add(new StringContent("tetris"), "problem");
+            form.Add(new StringContent(filename.Split(".").First()), "mainclass");
+            form.Add(new StringContent(filename.Split(".").First().ToLower()), "problem");
             form.Add(new StringContent("true"), "script");
             string cd = System.Environment.CurrentDirectory;
             string[] files = Directory.GetFiles(cd);
