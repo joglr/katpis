@@ -2,6 +2,8 @@
 
 A command-line interface for kattis.com
 
+Currently only supports java, we are working on support for c#, python and others.
+
 ## Windows usage
 
 Clone this repository
