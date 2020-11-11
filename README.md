@@ -1,57 +1,92 @@
 # Katpis
+Katpis is a command-line interface for [kattis.com](https://www.kattis.com/developers/)
 
-A command-line interface for kattis.com
+## Supported languages
+- Java
 
-Currently only supports java, we are working on support for c#, python and others.
+We are working on support for:
+- C#
+- Python
 
-## Windows usage
+ ... and others - feel free to contribute!
 
-Clone this repository
+## Installation
+### Windows
+Currently we don't automaticly build installers, so for now installation steps are as follows:
 
-Add the root of this folder to your path enviroment variables e.g.: `C:\\Users\myuser\somefolder\katpis`
+1. Install [.NET Core SDK](https://dotnet.microsoft.com/download)
+
+1. Clone this repository
+
+1. Add the root of this folder to your path enviroment variables - e.g. `C:\Users\myuser\somefolder\katpis`
 
 Now you can run the command `katpis` anywhere!
 
-# Avalible commands
+### Mac/Linux
+We will provide installation instructions for these platforms in the near future. You might be able to get it to work using the instructions for Windows.
 
-## Submit
-`submit <filename-with-extension>`
+## Available commands
+### katpis submit
+This command is still work in progress
 
-Submits a .java file from the current directory to kattis with a matching name to a kattis problem shortname.
+#### Usage
+    katpis submit <filename-with-extension>
 
-Example:
-For the problem "Take Two Stones" at open.kattis.com/problems/twostones, run `katpis submit Twostones.java`
+#### Example
+    katpis submit hello.java
 
-## Test
-`test`
+### katpis test
+Looks for a file in the current directory with a `.java` file extension, runs it with any `.in` files as standard input, and compares the output with any `.ans` files in the directory.
 
-Tests any matching .in and .ans files on any .java problem in the current directory.
+#### Usage
+    katpis test
 
-## Fetch
-`fetch <kattis-problem-shortname>`
+### katpis fetch
+Attemps to download sample files for a given problem. If available, they will be downloaded to the current directory.
 
-Fetches any available sample files given the shortname of any kattis problem.
+#### Usage
+    katpis fetch <kattis-problem-shortname>
+**Example**: 
 
-Example: For the problem "Quality-Adjusted Life-Year" at open.kattis.com/problems/qaly, run `katpis fetch qaly`, and if there is sample files avalible, they will be downloaded and placed in the current directory.
+For the problem "Hello World!" at [open.kattis.com/problems/hello](https://open.kattis.com/problems/hello), run 
 
-## Template
-`template <filename-with-extension>`
+    katpis fetch hello
+    
+You should now see the newly downloaded files in your current directory.
 
-Generates a .java file with some boilerplate/template content for parsing, input and output.
+### katpis template
 
-Example: `katpis template Hello.java` creates a Hello.java in the current directory.
+Generate a new file from a template with basic input parsing.
+
+#### Usage
+
+    katpis template <filename-with-extension>
+
+#### Example
+
+    katpis template Hello.java
+    
+The above command will generate a `.java` file to the current directory.
 
 ## Development
 
-### Useful commands:
+### Useful commands
+
+To run katpis using .NET Core SDK, the following command can be used:
+
+```
+dotnet run
+```
+
+You can pass any arguments, e.g. sub command and its arguments, after `dotnet run`
+
+To rebuild and restart the program every time the source code changes, use the following command:
 
 ```
 dotnet watch run
 ```
 
-```
-dotnet run
-```
+To interactively stage changes to git, use the following command:
 
 ```
  git add -p
