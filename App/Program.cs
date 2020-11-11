@@ -17,7 +17,26 @@ namespace Tester
         static async System.Threading.Tasks.Task Main(string[] args)
         {
             if (args.Length == 0) {
-                //TODO print commands and options
+                Console.WriteLine(
+@"
+Katpis - a Kattis cli
+
+  A.-.A
+=[O . O]=
+o(___UU)
+
+Try some commands:
+
+katpis fetch <kattis-problem-shortname>
+ - Fetches any available sample files given the shortname of any kattis problem.
+
+katpis test
+ - Tests any matching .in and .ans files on any .java program in the current directory.
+
+katpis submit <filename-with-extension>
+ - Submits a .java file to kattis with a matching name to a kattis problem shortname.
+"
+                );
             } else if (args.Length >= 1) {
                 switch (args[0]){
                     case "submit":
@@ -34,7 +53,7 @@ namespace Tester
                         if (args.Length == 2){
                             RunFetch(args[1]);
                         } else {
-                            Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname> e.g.: hello.java");
+                            Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname> e.g.: twostones");
                         }
                         break;
                     case "template":
