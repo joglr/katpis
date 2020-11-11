@@ -1,6 +1,6 @@
 # Katpis
 
-Katpis is a command-line interface for [kattis.com](https://www.kattis.com/)
+Katpis is a command-line interface for [kattis.com](https://www.kattis.com/developers/)
 
 ## Supported languages
 
