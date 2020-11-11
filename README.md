@@ -37,7 +37,9 @@ Example: For the problem "Quality-Adjusted Life-Year" at open.kattis.com/problem
 ## Template
 `template <filename-with-extension>`
 
-Example: `katpis template Hello.java`, will generate a java file with some parsing template content, to the current directory.
+Generates a .java file with some boilerplate/template content for parsing, input and output.
+
+Example: `katpis template Hello.java` creates a Hello.java in the current directory.
 
 ## Development
 
