@@ -32,7 +32,7 @@ We will provide installation instructions for these platforms in the near future
 ## Available commands
 
 ### katpis submit
-This command is  a work in progress
+This command is still work in progress
 
 #### Usage
 
