@@ -27,7 +27,7 @@ We will provide installation instructions for these platforms in the near future
 
 ## Available commands
 ### katpis submit
-This command is still work in progress
+Submits a .java file from the current directory to kattis with a matching name to a kattis problem shortname.
 
 #### Usage
     katpis submit <filename-with-extension>
@@ -36,7 +36,7 @@ This command is still work in progress
     katpis submit hello.java
 
 ### katpis test
-Looks for a file in the current directory with a `.java` file extension, runs it with any `.in` files as standard input, and compares the output with any `.ans` files in the directory.
+Tests any matching `.in` and `.ans` files on any `.java` problem in the current directory.
 
 #### Usage
     katpis test
@@ -48,11 +48,11 @@ Attemps to download sample files for a given problem. If available, they will be
     katpis fetch <kattis-problem-shortname>
 **Example**: 
 
-For the problem "Hello World!" at [open.kattis.com/problems/hello](https://open.kattis.com/problems/hello), run 
+For the problem "Quality-Adjusted Life-Year" at [open.kattis.com/problems/qaly](open.kattis.com/problems/qaly), run 
 
-    katpis fetch hello
+    katpis fetch qaly
     
-You should now see the newly downloaded files in your current directory.
+You should now see the newly downloaded files in your current directory, if any sample files were available.
 
 ### katpis template
 
