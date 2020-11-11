@@ -64,13 +64,17 @@ If there is sample files avalible, they will be downloaded to the current direct
 
 ### katpis template
 
+Generate a new file from a template with basic input parsing
+
 #### Usage
 
     template <filename-with-extension>
 
 #### Example
 
-Running `katpis template Hello.java` will generate a java file from a template with basic parsing, to the current directory.
+    katpis template Hello.java
+    
+The above command will generate a `.java` file to the current directory.
 
 ## Development
 
