@@ -65,8 +65,14 @@ namespace Tester
         {
             string dir = AppDomain.CurrentDomain.BaseDirectory;
             dir = dir.Substring(0,dir.LastIndexOf("\\App"));
-            string configPath = Directory.GetFiles(dir).Where(x => x.EndsWith(".kattisrc")).First();
-            
+            string configPath;
+            try {
+                configPath = Directory.GetFiles(dir).Where(x => x.EndsWith(".kattisrc")).First();
+            } catch (InvalidOperationException) {
+                Console.WriteLine("Config file not found, please download a .kattisrc file from a kattis site like https://open.kattis.com/download/kattisrc and place it in root directory of katpis: " + dir);
+                return; //TODO Prompt user to login and auto download .kattisrc file
+            }
+
             Dictionary<string, Dictionary<string, string>> configObject = ParseConfigFile(configPath);
 
             // Login
