@@ -22,7 +22,7 @@ Currently we don't build automatic installers, so for now installation steps are
 
 1. Clone this repository
 
-1. Add the root of this folder to your path enviroment variables - e.g.: `C:\Users\myuser\somefolder\katpis`
+1. Add the root of this folder to your path enviroment variables - e.g. `C:\Users\myuser\somefolder\katpis`
 
 Now you can run the command `katpis` anywhere!
 
