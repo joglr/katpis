@@ -22,7 +22,7 @@ namespace Tester
                 switch (args[0]){
                     case "submit":
                         if (args.Length == 2){
-                            await runSubmitAsync(args[1]);
+                            await RunSubmitAsync(args[1]);
                         } else {
                             Console.WriteLine("submit takes 1 more argument, <filename>, e.g.: hello.java");
                         }
@@ -32,28 +32,41 @@ namespace Tester
                         break;
                     case "fetch":
                         if (args.Length == 2){
-                            runFetch(args[1]);
+                            RunFetch(args[1]);
                         } else {
                             Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname> e.g.: hello.java");
                         }
                         break;
                     case "template":
                         if (args.Length == 2) {
-                            runTemplate(args[1]);
+                            RunTemplate(args[1]);
                         } else {
                             Console.WriteLine("template takes 1 more argument, <filename>, e.g.: hello.java");
                         }
                         break;
+                    case "dir":
+                        GetProjectDir();
+                        break;
                     default:
-                        Console.WriteLine("Unknown first argument" + args[0]);
+                        Console.WriteLine("Unknown first argument: " + args[0]);
                         break;
                 }
             }
         }
 
-        private static async System.Threading.Tasks.Task runSubmitAsync(string filename)
+        private static void GetProjectDir()
         {
-            string configPath = ".kattisrc"; //TODO this path points to dir where you call katpis, change this to some absolute path
+            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            dir = dir.Substring(0,dir.LastIndexOf("\\App"));
+            var configFilePath = Directory.GetFiles(dir).Where(x => x.EndsWith(".kattisrc")).First();
+        }
+
+        private static async System.Threading.Tasks.Task RunSubmitAsync(string filename)
+        {
+            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            dir = dir.Substring(0,dir.LastIndexOf("\\App"));
+            string configPath = Directory.GetFiles(dir).Where(x => x.EndsWith(".kattisrc")).First();
+            
             Dictionary<string, Dictionary<string, string>> configObject = ParseConfigFile(configPath);
 
             // Login
@@ -210,7 +223,7 @@ namespace Tester
             return configObject;
         }
 
-        public static void runTemplate(string filename)
+        public static void RunTemplate(string filename)
         {
             string pattern = @".java$";
             string input = filename;
@@ -237,7 +250,7 @@ public class {className} {{
             }
         }
 
-        public static void runFetch(string problemName)
+        public static void RunFetch(string problemName)
         {
 
             Console.WriteLine("Fetching...");
