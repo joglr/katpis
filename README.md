@@ -12,7 +12,7 @@ We are working on support for:
 
 ## Installation
 ### Windows
-Currently we don't automaticly build installers, so for now installation steps are as follows:
+Currently we don't automatically build installers, so for now installation steps are as follows:
 
 1. Install [.NET Core SDK](https://dotnet.microsoft.com/download)
 
