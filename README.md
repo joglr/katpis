@@ -33,7 +33,7 @@ Fetches any available sample files given the shortname of any kattis problem.
 #### Example
 For the problem "Quality-Adjusted Life-Year" at open.kattis.com/problems/qaly
 
-Run `katpis fetch qaly`, and if there is sample files avalible, they will be downloaded to the current directory.
+Run `katpis fetch qaly`, and if there is sample files avalible, they will be downloaded and placed in the current directory.
 
 ### `template <filename-with-extension>`
 
