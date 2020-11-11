@@ -42,7 +42,7 @@ Tests any matching `.in` and `.ans` files on any `.java` problem in the current 
     katpis test
 
 ### katpis fetch
-Fetches any available sample files given the shortname of any kattis problem.
+Fetches any available sample files, given the shortname of any kattis problem.
 
 #### Usage
     katpis fetch <kattis-problem-shortname>
