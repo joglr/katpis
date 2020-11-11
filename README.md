@@ -12,7 +12,9 @@ We are working on support for:
 
  ... and others - feel free to contribute!
 
-## Windows usage
+## Installation 
+
+### Windows
 
 Currently we don't build automatic installers, so for now installation steps are as follows:
 
@@ -23,6 +25,9 @@ Currently we don't build automatic installers, so for now installation steps are
 1. Add the root of this folder to your path enviroment variables - e.g.: `C:\Users\myuser\somefolder\katpis`
 
 Now you can run the command `katpis` anywhere!
+
+### Mac/Linux
+We will provide installation instructions for these platforms in the near future. You might be able to get it to work using the instructions for Windows.
 
 ## Available commands
 
