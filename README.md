@@ -46,7 +46,7 @@ Fetches any available sample files, given the shortname of any kattis problem.
 
 #### Usage
     katpis fetch <kattis-problem-shortname>
-**Example**: 
+#### Example
 
 For the problem "Quality-Adjusted Life-Year" at [open.kattis.com/problems/qaly](open.kattis.com/problems/qaly), run 
 
