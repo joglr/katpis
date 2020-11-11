@@ -16,9 +16,11 @@ Now you can run the command `katpis` anywhere!
 
 ### `submit <filename-with-extension>`
 
-This command is a work in progress
+Submits a .java file from the current directory to kattis with a matching name to a kattis problem shortname.
 
-Example: `katpis submit hello.java`
+#### Example
+For the problem "Take Two Stones" at open.kattis.com/problems/twostones
+Run `katpis submit Twostones.java`
 
 ### `test`
 
@@ -26,9 +28,12 @@ Tests any matching .in and .ans files on any .java problem in the current direct
 
 ### `fetch <kattis-problem-shortname>`
 
-Example: For the problem "Hello World!" at open.kattis.com/problems/hello
+Fetches any available sample files given the shortname of any kattis problem.
 
-Run `katpis fetch hello`, and if there is sample files avalible, they will be downloaded to the current directory.
+#### Example
+For the problem "Quality-Adjusted Life-Year" at open.kattis.com/problems/qaly
+
+Run `katpis fetch qaly`, and if there is sample files avalible, they will be downloaded to the current directory.
 
 ### `template <filename-with-extension>`
 
