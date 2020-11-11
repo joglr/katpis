@@ -22,7 +22,7 @@ Example: `katpis submit hello.java`
 
 ### `test`
 
-Finds a .java file in the current directory with a .java file extension, runs it with any .in files, and compares the output with any .ans files in the directory.
+Tests any matching .in and .ans files on any .java problem in the current directory.
 
 ### `fetch <kattis-problem-shortname>`
 
