@@ -33,7 +33,7 @@ Submits a .java file from the current directory to kattis with a matching name t
     katpis submit <filename-with-extension>
 
 #### Example
-    katpis submit hello.java
+    katpis submit Hello.java
 
 ### katpis test
 Tests any matching `.in` and `.ans` files on any `.java` problem in the current directory.
