@@ -19,22 +19,26 @@ namespace Tester
             if (args.Length == 0) {
                 Console.WriteLine(
 @"
-Katpis - a Kattis cli
-
   A.-.A
 =[O . O]=
 o(___UU)
 
-Try some commands:
+USAGE
+  katpis <command> <argument>
 
-katpis fetch <kattis-problem-shortname>
- - Fetches any available sample files given the shortname of any kattis problem.
+CORE COMMANDS
+  fetch:     Fetches any available sample files, given the shortname of any kattis problem.
+  test:      Tests any matching .in and .ans files on any .java program in the current directory.
+  submit:    Submits a .java file to kattis with a matching name to a kattis problem shortname.
 
-katpis test
- - Tests any matching .in and .ans files on any .java program in the current directory.
+OTHER COMMANDS
+  template:  Generates a .java file with some boilerplate/template content for parsing, input and output.
 
-katpis submit <filename-with-extension>
- - Submits a .java file to kattis with a matching name to a kattis problem shortname.
+LEARN MORE
+  Read the guide in the README.md
+
+FEEDBACK
+  Open an issue on github at github.com/joglr/katpis/issues
 "
                 );
             } else if (args.Length >= 1) {
