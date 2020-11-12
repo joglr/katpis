@@ -1,13 +1,35 @@
 using System;
+using System.IO;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
 using static System.ConsoleColor;
 
-namespace kat
+namespace Katpis
 {
   class ConsoleUtils
   {
     const ConsoleColor PREDICTION_COLOR = DarkGray;
-    public static readonly Func<string, string> emptyPredictor = _ => "";
+
+    public class EmptyPredictor : Predictor
+    {
+      public string Predict(string input) {
+        return "";
+      }
+    }
+
+    public static bool EmailVerifier(string email)
+    {
+      if (email.Length == 0) return false;
+      try
+      {
+        var validsEmail = new MailAddress(email).Address;
+      }
+      catch (FormatException)
+      {
+        return false;
+      }
+      return true;
+    }
 
     public static void Colored(
       Action act,
@@ -24,6 +46,14 @@ namespace kat
       Console.BackgroundColor = prevBackground;
     }
 
+    public static void LC(ConsoleColor consoleColor, Object toLog) {
+      Colored(() => Console.WriteLine(toLog.ToString()), foregroundColor: consoleColor);
+    }
+
+    public static void C(ConsoleColor consoleColor, Object toLog) {
+      Colored(() => Console.Write(toLog.ToString()), foregroundColor: consoleColor);
+    }
+
     public static void ClearCurrentConsoleLine()
     {
       int currentLineCursor = Console.CursorTop;
@@ -37,10 +67,11 @@ namespace kat
       string helpMessage,
       string errorMessage,
       Predicate<string> checkValid,
-      Func<string, string> getPrediction = null,
+      Predictor predictor = null,
       string acceptedCharsPattern = ".")
     {
-      if (getPrediction == null) getPrediction = emptyPredictor;
+      Console.TreatControlCAsInput = true;
+      if (predictor == null) predictor = new EmptyPredictor();
       string message = helpMessage;
       string text = "";
       string prediction = null;
@@ -112,10 +143,51 @@ namespace kat
             break;
         }
 
-        prediction = getPrediction(text);
+        prediction = predictor.Predict(text);
       }
 
+      Console.TreatControlCAsInput = false;
       return text;
+    }
+  }
+
+  public interface Predictor {
+     string Predict(string input);
+  };
+
+  public class EmailPredicter : Predictor {
+    private string COMMON_EMAIL_SUFFIXES_PATH =  @"\Resources\email-suffixes.csv";
+    const string validCharsPattern = @"^\S$";
+    public static string[] commonEmailSuffixes;
+
+    public EmailPredicter() {
+
+      commonEmailSuffixes = File.ReadAllLines(Path.Join(
+          Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+          COMMON_EMAIL_SUFFIXES_PATH
+      ));
+    }
+
+    public string Predict(string input)  {
+      if (input.Contains("@"))
+      {
+        var parts = input.Split("@");
+        if (parts.Length.Equals(2))
+        {
+          var server = parts[1];
+          if (server.Length > 0)
+          {
+            foreach (var item in commonEmailSuffixes)
+            {
+              if (item.StartsWith(server) && item.Contains(server) && !item.Equals(server))
+              {
+                return item.Substring(server.Length);
+              }
+            }
+          }
+        }
+      }
+      return null;
     }
   }
 }
