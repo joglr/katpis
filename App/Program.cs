@@ -24,7 +24,7 @@ namespace Tester
 o(___UU)
 
 USAGE
-  katpis <command> <argument>
+  katpis <command> <arguments>
 
 CORE COMMANDS
   fetch:     Fetches any available sample files, given the shortname of any kattis problem.
@@ -123,7 +123,7 @@ FEEDBACK
 
             // TODO submit file to kattis
             Console.WriteLine("submitting...");
-            
+
             var form = new MultipartFormDataContent();
             form.Add(new StringContent(configObject["user"]["username"]), "user");
             form.Add(new StringContent(configObject["user"]["token"]), "token");
@@ -182,12 +182,12 @@ FEEDBACK
 
                 statusIdTracker = status["status_id"];
                 Console.WriteLine(
-                    "Status: " + 
+                    "Status: " +
                     GetMessageFromStatusID(status["status_id"]) +
-                    $" [{status["status_id"]}]" + 
-                    " on testcase " + 
-                    status["testcase_index"].ToString() + 
-                    " of " + 
+                    $" [{status["status_id"]}]" +
+                    " on testcase " +
+                    status["testcase_index"].ToString() +
+                    " of " +
                     numOfTestcases
                 );
 
@@ -218,7 +218,7 @@ FEEDBACK
                 default:
                     return "Unknown status id";
             }
-            
+
         }
 
         private static Dictionary<string, Dictionary<string, string>> ParseConfigFile(string configPath)
@@ -283,7 +283,7 @@ public class {className} {{
         {
 
             Console.WriteLine("Fetching...");
-            
+
             string cd = System.Environment.CurrentDirectory;
 
             string url = $"https://open.kattis.com/problems/{problemName}/file/statement/samples.zip";
@@ -340,14 +340,14 @@ public class {className} {{
             );
 
             // 3. Run program with in files
-            
+
             foreach (string inFile in inFiles)
             {
                 string command = "java " + programPath + " < " + inFile;
 
                 // 4. Get result
                 // 5. Read output of program
-                List<string> actualOutput = RunTestCommand(command);        
+                List<string> actualOutput = RunTestCommand(command);
 
                 string ansFile = inFile.Replace(".in", ".ans");
                 if (!ansFiles.Contains(ansFile)) throw new FileNotFoundException(
