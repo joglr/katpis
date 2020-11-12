@@ -142,16 +142,14 @@ namespace Katpis
 
             HttpClient client = new HttpClient();
 
-
             var loginResponse = await client.PostAsync(loginurl, content);
 
             ClearCurrentConsoleLine();
-            Console.Write("Login sucessful...");
+            Console.WriteLine("Login sucessful.");
             // var sessionCookie = loginResponse.Headers.GetValues("Set-Cookie").Where(x => x.Contains("EduSiteCookie")).First().Split(";").First();
 
             var loginResponseString = await loginResponse.Content.ReadAsStringAsync();
 
-            ClearCurrentConsoleLine();
             Console.Write("Submitting...");
 
             var form = new MultipartFormDataContent();
@@ -178,8 +176,9 @@ namespace Katpis
             }
             Match m = mc[0];
             string submissionid = m.Groups[1].ToString();
+
             ClearCurrentConsoleLine();
-            Console.Write("Submission successful.");
+            Console.WriteLine("Submission successful.");
 
             // Login again
             client = new HttpClient();
@@ -208,18 +207,20 @@ namespace Katpis
                 mc = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
                 int numOfTestcases = 0;
 
-                if (mc.Count > 0) numOfTestcases = int.Parse(mc[0].Groups[1].ToString());
-
+                if (mc.Count > 0) numOfTestcases = int.Parse(mc[0].Groups[1].Value);
 
                 string progressBar = " [";
 
                 if (mc.Count > 0 ) {
 
-                    var progress = status["testcase_index"] / numOfTestcases;
+                    double acceptedFraction = status["testcase_index"] / (double)numOfTestcases;
 
-                    for (int i = 0; i < numOfTestcases; i++) {
-                        var currentStep = ((double)i) / numOfTestcases;
-                        progressBar += (currentStep < progress) ? "■".Green() : ".";
+                    int progressBarLength = 25;
+                    for (int i = 0; i < progressBarLength; i++) {
+                        var currentFraction = i / (double)progressBarLength;
+                        progressBar += (currentFraction <= acceptedFraction)
+                                    ? "■".Green()
+                                    : ".";
                     }
                 }
                 progressBar += "] ";
