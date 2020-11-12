@@ -1,6 +1,8 @@
 # Katpis
 Katpis is a command-line interface for [kattis.com](https://www.kattis.com/developers/)
 
+![katpis submit](https://i.gyazo.com/d593615497aaa9a93966bbdfb9b3e946.gif)
+
 ## Supported languages
 - Java
 
@@ -27,6 +29,7 @@ We will provide installation instructions for these platforms in the near future
 
 ## Available commands
 ### katpis submit
+
 Submits a .java file from the current directory to kattis with a matching name to a kattis problem shortname.
 
 #### Usage
