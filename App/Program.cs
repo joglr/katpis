@@ -86,7 +86,7 @@ FEEDBACK
 
         private static async System.Threading.Tasks.Task RunSubmitAsync(string filename)
         {
-            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            string dir = AppDomain.CurrentDomain.BaseDirectory; //TODO this is maybe not best pratice
             dir = dir.Substring(0,dir.LastIndexOf("\\App"));
             string configPath;
             try {
