@@ -46,14 +46,6 @@ namespace Katpis
       Console.BackgroundColor = prevBackground;
     }
 
-    public static void LC(ConsoleColor consoleColor, Object toLog) {
-      Colored(() => Console.WriteLine(toLog.ToString()), foregroundColor: consoleColor);
-    }
-
-    public static void C(ConsoleColor consoleColor, Object toLog) {
-      Colored(() => Console.Write(toLog.ToString()), foregroundColor: consoleColor);
-    }
-
     public static void ClearCurrentConsoleLine()
     {
       int currentLineCursor = Console.CursorTop;

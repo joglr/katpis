@@ -9,36 +9,60 @@ using System.IO.Compression;
 using System.Json;
 using System.Net.Http;
 using System.Threading;
+using System.Configuration;
+using static Katpis.ConsoleUtils;
 
-namespace Tester
+namespace Katpis
 {
-    class Program
+  class Program
     {
+        public const string Version = "0.2.1";
+
         static async System.Threading.Tasks.Task Main(string[] args)
         {
             if (args.Length == 0) {
-                Console.WriteLine(
+                Console.WriteLine(@"
+   A.-.A
+ =[O . O]=
+ o(___UU)".Cyan() +
 @"
-  A.-.A
-=[O . O]=
-o(___UU)
 
-USAGE
+" +
+"USAGE".White().Bold() +
+@"
+" +
+@"
   katpis <command> <arguments>
 
-CORE COMMANDS
-  fetch:     Fetches any available sample files, given the shortname of any kattis problem.
-  test:      Tests any matching .in and .ans files on any .java program in the current directory.
-  submit:    Submits a .java file to kattis with a matching name to a kattis problem shortname.
+" +
+"COMMANDS".White().Bold() +
+@"
 
-OTHER COMMANDS
-  template:  Generates a .java file with some boilerplate/template content for parsing, input and output.
+  fetch    Fetch sample files if available
 
-LEARN MORE
-  Read the guide in the README.md
+  test     Tests any matching .in and .ans files on
+           any .java program in the current directory.
 
-FEEDBACK
-  Open an issue on github at github.com/joglr/katpis/issues
+  submit   Submits a .java file to kattis with a matching
+           name to a kattis problem shortname.
+
+  template Generates a .java file with some boilerplate/
+           template content for parsing, input and output.
+
+" +
+ "LEARN MORE".White().Bold() +
+
+@"
+
+   Read the guide in the README.md
+
+" +
+ "FEEDBACK".Bold() +
+@"
+
+   Open an issue on github at github.com/joglr/katpis/issues
+
+
 "
                 );
             } else if (args.Length >= 1) {
@@ -57,7 +81,10 @@ FEEDBACK
                         if (args.Length == 2){
                             RunFetch(args[1]);
                         } else {
-                            Console.WriteLine("fetch takes 1 argument, <kattis-problem-shortname> e.g.: twostones");
+                            Console.WriteLine(
+                                "Usage: " +
+                                "fetch <problem_id>".Bold().Blue()
+                            );
                         }
                         break;
                     case "template":
@@ -121,7 +148,6 @@ FEEDBACK
 
             Console.WriteLine(loginResponseString);
 
-            // TODO submit file to kattis
             Console.WriteLine("submitting...");
 
             var form = new MultipartFormDataContent();
@@ -434,6 +460,5 @@ public class {className} {{
             process.Close();
             return outputLines;
         }
-
     }
 }
