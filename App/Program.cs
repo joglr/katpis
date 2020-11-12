@@ -126,6 +126,8 @@ namespace Katpis
             Dictionary<string, Dictionary<string, string>> configObject = ParseConfigFile(configPath);
 
             // Login
+
+            Console.Write("Logging in...");
             string loginurl = configObject["kattis"]["loginurl"];
             string submissionurl = configObject["kattis"]["submissionurl"];
             string submissionsurl = configObject["kattis"]["submissionsurl"];
@@ -140,15 +142,17 @@ namespace Katpis
 
             HttpClient client = new HttpClient();
 
+
             var loginResponse = await client.PostAsync(loginurl, content);
-            Console.WriteLine(loginResponse.StatusCode);
+
+            ClearCurrentConsoleLine();
+            Console.Write("Login sucessful...");
             // var sessionCookie = loginResponse.Headers.GetValues("Set-Cookie").Where(x => x.Contains("EduSiteCookie")).First().Split(";").First();
 
             var loginResponseString = await loginResponse.Content.ReadAsStringAsync();
 
-            Console.WriteLine(loginResponseString);
-
-            Console.WriteLine("submitting...");
+            ClearCurrentConsoleLine();
+            Console.Write("Submitting...");
 
             var form = new MultipartFormDataContent();
             form.Add(new StringContent(configObject["user"]["username"]), "user");
@@ -174,7 +178,8 @@ namespace Katpis
             }
             Match m = mc[0];
             string submissionid = m.Groups[1].ToString();
-            Console.WriteLine("Submission successful.");
+            ClearCurrentConsoleLine();
+            Console.Write("Submission successful.");
 
             // Login again
             client = new HttpClient();
@@ -201,21 +206,40 @@ namespace Katpis
                 JsonValue status = JsonObject.Parse(statusResponseString);
 
                 mc = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
-                string numOfTestcases = "Unknown";
-                if (mc.Count > 0) {
-                    numOfTestcases = mc[0].Groups[1].ToString();
+                int numOfTestcases = 0;
+
+                if (mc.Count > 0) numOfTestcases = int.Parse(mc[0].Groups[1].ToString());
+
+
+                string progressBar = " [";
+
+                if (mc.Count > 0 ) {
+
+                    var progress = status["testcase_index"] / numOfTestcases;
+
+                    for (int i = 0; i < numOfTestcases; i++) {
+                        var currentStep = ((double)i) / numOfTestcases;
+                        progressBar += (currentStep < progress) ? "■".Green() : ".";
+                    }
                 }
+                progressBar += "] ";
 
                 statusIdTracker = status["status_id"];
-                Console.WriteLine(
+                ClearCurrentConsoleLine();
+                Console.Write(
                     "Status: " +
-                    GetMessageFromStatusID(status["status_id"]) +
-                    $" [{status["status_id"]}]" +
-                    " on testcase " +
-                    status["testcase_index"].ToString() +
-                    " of " +
-                    numOfTestcases
-                );
+                    GetMessageFromStatusID(status["status_id"]));
+
+                if (mc.Count > 0) {
+                    Console.Write(
+                        progressBar +
+                        // $" [{status["status_id"]}]" +
+                        " case " +
+                        status["testcase_index"].ToString().Bold() +
+                        " of " +
+                        numOfTestcases.ToString().Bold()
+                    );
+                }
 
                 Thread.Sleep(500);
             }
@@ -226,23 +250,23 @@ namespace Katpis
             switch (statusid)
             {
                 case 0:
-                    return "New";
+                    return "New".Cyan();
                 case 3:
                     return "Unknown status(Maybe quick accept / spam protection)";
                 case 5:
-                    return "Running";
+                    return "Running".Blue();
                 case 8:
-                    return "Compile Error";
+                    return "Compile Error".Red();
                 case 9:
-                    return "Runtime Error";
+                    return "Runtime Error".Red();
                 case 12:
-                    return "Time Limit Exceeded";
+                    return "Time Limit Exceeded".Red();
                 case 14:
-                    return "Wrong Answer";
+                    return "Wrong Answer".Red();
                 case 16:
-                    return "Accepted";
+                    return "Accepted".Green();
                 default:
-                    return "Unknown status id";
+                    return "Unknown status id".Red();
             }
 
         }
