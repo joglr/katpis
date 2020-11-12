@@ -122,7 +122,6 @@ namespace Katpis
                 Console.WriteLine("Config file not found, please download a .kattisrc file from a kattis site like https://open.kattis.com/download/kattisrc and place it in root directory of katpis: " + dir);
                 return; //TODO Prompt user to login and auto download .kattisrc file
             }
-
             Dictionary<string, Dictionary<string, string>> configObject = ParseConfigFile(configPath);
 
             // Login
@@ -139,9 +138,7 @@ namespace Katpis
                 { "User-Agent", "kattis-cli-submit" },
             };
             var content = new FormUrlEncodedContent(contentObject);
-
             HttpClient client = new HttpClient();
-
             var loginResponse = await client.PostAsync(loginurl, content);
 
             ClearCurrentConsoleLine();
@@ -162,19 +159,21 @@ namespace Katpis
             form.Add(new StringContent(filename.Split(".").First()), "mainclass");
             form.Add(new StringContent(filename.Split(".").First().ToLower()), "problem");
             form.Add(new StringContent("true"), "script");
+            
             string cd = System.Environment.CurrentDirectory;
             string[] files = Directory.GetFiles(cd);
             string filePath = files.First(x => x.EndsWith(filename));
             var fileBytes = File.ReadAllBytes(filePath);
             form.Add(new ByteArrayContent(fileBytes, 0, fileBytes.Length), "sub_file[]", filename);
+
             HttpResponseMessage submitResponse = await client.PostAsync(submissionurl, form);
             string submitResponseString = await submitResponse.Content.ReadAsStringAsync();
-            MatchCollection mc = Regex.Matches(submitResponseString, @"Submission ID: (\d+)", RegexOptions.Multiline);
-            if (mc.Count <= 0) {
+            MatchCollection matchCollection = Regex.Matches(submitResponseString, @"Submission ID: (\d+)", RegexOptions.Multiline);
+            if (matchCollection.Count <= 0) {
                 Console.WriteLine("A submission id could not be found");
                 return;
             }
-            Match m = mc[0];
+            Match m = matchCollection[0];
             string submissionid = m.Groups[1].ToString();
 
             ClearCurrentConsoleLine();
@@ -198,23 +197,30 @@ namespace Katpis
             content = new FormUrlEncodedContent(contentObject);
 
             int statusIdTracker = 0;
+            int requestStatusCounter = 0;
             while (statusIdTracker == 0 || statusIdTracker == 5) {
                 string statusurl = $"{submissionsurl}/{submissionid}?json";
                 HttpResponseMessage statusResponse = await client.PostAsync(statusurl, content);
                 string statusResponseString = await statusResponse.Content.ReadAsStringAsync();
                 JsonValue status = JsonObject.Parse(statusResponseString);
 
-                mc = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
-                int numOfTestcases = 0;
+                matchCollection = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
+                bool numOfTestcasesIsKnown = matchCollection.Count > 0;
+                int numOfTestcases = 1; // 1 to avoid div by 0 exception
 
-                if (mc.Count > 0) numOfTestcases = int.Parse(mc[0].Groups[1].Value);
+                ClearCurrentConsoleLine();
+                Console.Write(
+                    "Status: " +
+                    GetMessageFromStatusID(status["status_id"])
+                );
 
-                string progressBar = " [";
+                if(!numOfTestcasesIsKnown) Console.Write(LoadingDots(requestStatusCounter));
 
-                if (mc.Count > 0 ) {
+                if (numOfTestcasesIsKnown) {
+                    numOfTestcases = int.Parse(matchCollection[0].Groups[1].Value);
 
+                    string progressBar = " [";
                     double acceptedFraction = status["testcase_index"] / (double)numOfTestcases;
-
                     int progressBarLength = 25;
                     for (int i = 0; i < progressBarLength; i++) {
                         var currentFraction = i / (double)progressBarLength;
@@ -222,16 +228,8 @@ namespace Katpis
                                     ? "■".Green()
                                     : ".";
                     }
-                }
-                progressBar += "] ";
+                    progressBar += "] ";
 
-                statusIdTracker = status["status_id"];
-                ClearCurrentConsoleLine();
-                Console.Write(
-                    "Status: " +
-                    GetMessageFromStatusID(status["status_id"]));
-
-                if (mc.Count > 0) {
                     Console.Write(
                         progressBar +
                         // $" [{status["status_id"]}]" +
@@ -242,11 +240,24 @@ namespace Katpis
                     );
                 }
 
+                requestStatusCounter++;
+                statusIdTracker = status["status_id"];
                 Thread.Sleep(500);
             }
         }
 
-        private static string GetMessageFromStatusID(int statusid)
+    private static string LoadingDots(int requestStatusCounter)
+    {
+      if (requestStatusCounter % 3 == 2){
+          return "...";
+      } else if(requestStatusCounter % 3 == 1) {
+          return "..";
+      } else {
+          return ".";
+      }
+    }
+
+    private static string GetMessageFromStatusID(int statusid)
         {
             switch (statusid)
             {
