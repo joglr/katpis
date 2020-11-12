@@ -6,7 +6,7 @@ using static System.ConsoleColor;
 
 namespace Katpis
 {
-  class ConsoleUtils
+  static class ConsoleUtils
   {
     const ConsoleColor PREDICTION_COLOR = DarkGray;
 
