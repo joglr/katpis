@@ -1,4 +1,4 @@
-# Katpis
+# Katpis - A Kattis CLI
 Katpis is a command-line interface for [kattis.com](https://www.kattis.com/)
 
 ![katpis submit](https://i.gyazo.com/d593615497aaa9a93966bbdfb9b3e946.gif)
