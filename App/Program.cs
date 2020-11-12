@@ -179,6 +179,10 @@ namespace Katpis
             ClearCurrentConsoleLine();
             Console.WriteLine("Submission successful.");
 
+            string afterSubmissionStatusUrl = $"{submissionsurl}/{submissionid}";
+            Console.WriteLine("Submission ID: " + submissionid);
+            Console.WriteLine(afterSubmissionStatusUrl);
+
             // Login again
             client = new HttpClient();
 
@@ -203,6 +207,7 @@ namespace Katpis
                 HttpResponseMessage statusResponse = await client.PostAsync(statusurl, content);
                 string statusResponseString = await statusResponse.Content.ReadAsStringAsync();
                 JsonValue status = JsonObject.Parse(statusResponseString);
+                int statusId = (int)status["status_id"];
 
                 matchCollection = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
                 bool numOfTestcasesIsKnown = matchCollection.Count > 0;
@@ -211,7 +216,7 @@ namespace Katpis
                 ClearCurrentConsoleLine();
                 Console.Write(
                     "Status: " +
-                    GetMessageFromStatusID(status["status_id"])
+                    GetMessageFromStatusID(statusId)
                 );
 
                 if(!numOfTestcasesIsKnown) Console.Write(LoadingDots(requestStatusCounter));
@@ -219,20 +224,31 @@ namespace Katpis
                 if (numOfTestcasesIsKnown) {
                     numOfTestcases = int.Parse(matchCollection[0].Groups[1].Value);
 
-                    string progressBar = " [";
+                    string progressBar = "[";
                     double acceptedFraction = status["testcase_index"] / (double)numOfTestcases;
                     int progressBarLength = 25;
+                    
+                    // create boxes in progessbar
+                    bool hasPrintedOneErrorBox = false;
                     for (int i = 0; i < progressBarLength; i++) {
                         var currentFraction = i / (double)progressBarLength;
-                        progressBar += (currentFraction <= acceptedFraction)
-                                    ? "■".Green()
-                                    : ".";
+                        if (currentFraction < acceptedFraction) {
+                            progressBar += "■".Green();
+                        } else {
+                            if(IsErrorStatus(statusId) && !hasPrintedOneErrorBox){
+                                progressBar += "■".Red();
+                                hasPrintedOneErrorBox = true;
+                            } else {
+                                progressBar += ".";
+                            }
+                        }
                     }
-                    progressBar += "] ";
+                    
+                    progressBar += "]";
 
                     Console.Write(
+                        " " +
                         progressBar +
-                        // $" [{status["status_id"]}]" +
                         " case " +
                         status["testcase_index"].ToString().Bold() +
                         " of " +
@@ -241,7 +257,7 @@ namespace Katpis
                 }
 
                 requestStatusCounter++;
-                statusIdTracker = status["status_id"];
+                statusIdTracker = statusId;
                 Thread.Sleep(500);
             }
         }
@@ -257,6 +273,14 @@ namespace Katpis
       }
     }
 
+    private static bool IsErrorStatus(int statusid)
+    {
+        return  statusid != 0 &&
+                statusid != 3 && // TODO not sure about this one
+                statusid != 5 &&
+                statusid != 16;
+    }
+
     private static string GetMessageFromStatusID(int statusid)
         {
             switch (statusid)
@@ -266,7 +290,7 @@ namespace Katpis
                 case 3:
                     return "Unknown status(Maybe quick accept / spam protection)";
                 case 5:
-                    return "Running".Blue();
+                    return "Running".Cyan();
                 case 8:
                     return "Compile Error".Red();
                 case 9:
