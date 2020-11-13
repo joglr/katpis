@@ -7,15 +7,6 @@ It is inspired by the official, but barebones CLI at [github.com/Kattis/kattis-c
 
 ![katpis submit](https://i.gyazo.com/d593615497aaa9a93966bbdfb9b3e946.gif)
 
-## Supported languages
-- Java
-
-We are working on support for:
-- C#
-- Python
-
- ... and others - feel free to contribute!
-
 ## Installation
 ### Windows
 Currently, we don't automatically build installers, so for now installation steps are as follows:
