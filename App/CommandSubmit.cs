@@ -12,6 +12,35 @@ namespace Katpis
 {
     static class CommandSubmit
     {
+        private static Dictionary<string,string> lang = new Dictionary<string, string>{
+            { ".c", "C" },
+            { ".c++", "C++" },
+            { ".cc", "C++" },
+            { ".c#", "C#" },
+            { ".cpp", "C++" },
+            { ".cs", "C#" },
+            { ".cxx", "C++" },
+            { ".cbl", "COBOL" },
+            { ".cob", "COBOL" },
+            { ".cpy", "COBOL" },
+            { ".fs", "F#" },
+            { ".go", "Go" },
+            { ".h", "C++" },
+            { ".hs", "Haskell" },
+            { ".java", "Java" },
+            { ".js", "JavaScript" },
+            { ".kt", "Kotlin" },
+            { ".lisp", "Common Lisp" },
+            { ".cl", "Common Lisp" },
+            { ".m", "Objective-C" },
+            { ".ml", "OCaml" },
+            { ".pas", "Pascal" },
+            { ".php", "PHP" },
+            { ".pl", "Prolog" },
+            { ".rb", "Ruby" },
+            { ".rs", "Rust" },
+            { ".scala", "Scala" },
+        };
         public static async System.Threading.Tasks.Task RunSubmitAsync(string filename)
         {
             string dir = AppDomain.CurrentDomain.BaseDirectory; //TODO this is maybe not best pratice
@@ -51,21 +80,20 @@ namespace Katpis
             Console.Write("Submitting...");
 
             var form = new MultipartFormDataContent();
-            form.Add(new StringContent(configObject["user"]["username"]), "user");
-            form.Add(new StringContent(configObject["user"]["token"]), "token");
-            form.Add(new StringContent("kattis-cli-submit"), "User-Agent");
-            form.Add(new StringContent("true"), "submit");
-            form.Add(new StringContent("2"), "submit_ctr");
-            form.Add(new StringContent("Java"), "language");
-            form.Add(new StringContent(filename.Split(".").First()), "mainclass");
-            form.Add(new StringContent(filename.Split(".").First().ToLower()), "problem");
-            form.Add(new StringContent("true"), "script");
-            
             string cd = System.Environment.CurrentDirectory;
             string[] files = Directory.GetFiles(cd);
             string filePath = files.First(x => x.EndsWith(filename));
             var fileBytes = File.ReadAllBytes(filePath);
             form.Add(new ByteArrayContent(fileBytes, 0, fileBytes.Length), "sub_file[]", filename);
+            form.Add(new StringContent(configObject["user"]["username"]), "user");
+            form.Add(new StringContent(configObject["user"]["token"]), "token");
+            form.Add(new StringContent("kattis-cli-submit"), "User-Agent");
+            form.Add(new StringContent("true"), "submit");
+            form.Add(new StringContent("2"), "submit_ctr");
+            form.Add(new StringContent(lang["." + filename.Split(".").Last()]), "language");
+            form.Add(new StringContent(filename.Split(".").First()), "mainclass");
+            form.Add(new StringContent(filename.Split(".").First().ToLower()), "problem");
+            form.Add(new StringContent("true"), "script");
 
             HttpResponseMessage submitResponse = await client.PostAsync(submissionurl, form);
             string submitResponseString = await submitResponse.Content.ReadAsStringAsync();

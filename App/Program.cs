@@ -14,7 +14,7 @@ namespace Katpis
 {
   class Program
     {
-        public const string Version = "0.3.0";
+        public const string Version = "0.3.1";
 
         static async System.Threading.Tasks.Task Main(string[] args)
         {
