@@ -3,7 +3,7 @@ Katpis is a command-line interface for [kattis.com](https://www.kattis.com/)
 
 Katpis allow you to fetch sample files, test your program, and submit your solution, all within your favorite commmand-line.
 
-Inspired by the official, but barebones CLI at [github.com/Kattis/kattis-cli](https://github.com/Kattis/kattis-cli)
+It is inspired by the official, but barebones CLI at [github.com/Kattis/kattis-cli](https://github.com/Kattis/kattis-cli)
 
 ![katpis submit](https://i.gyazo.com/d593615497aaa9a93966bbdfb9b3e946.gif)
 
@@ -18,7 +18,7 @@ We are working on support for:
 
 ## Installation
 ### Windows
-Currently we don't automatically build installers, so for now installation steps are as follows:
+Currently, we don't automatically build installers, so for now installation steps are as follows:
 
 1. Install [.NET Core SDK](https://dotnet.microsoft.com/download)
 
@@ -34,7 +34,7 @@ We will provide installation instructions for these platforms in the near future
 ## Available commands
 ### katpis submit
 
-Submits a .java file from the current directory to kattis with a matching name to a kattis problem shortname.
+Submits a `.java` file from the current directory to Tattis with a matching name to a Kattis problem shortname.
 
 #### Usage
     katpis submit <filename-with-extension>
@@ -49,7 +49,7 @@ Tests any matching `.in` and `.ans` files on any `.java` problem in the current 
     katpis test
 
 ### katpis fetch
-Fetches any available sample files, given the shortname of any kattis problem.
+Fetches any available sample files, given the shortname of any Kattis problem.
 
 #### Usage
     katpis fetch <kattis-problem-shortname>
@@ -63,7 +63,7 @@ You should now see the newly downloaded files in your current directory, if any 
 
 ### katpis template
 
-Generate a new file from a template with basic input parsing.
+Generates a new file from a template with basic input parsing.
 
 #### Usage
 
@@ -82,19 +82,13 @@ The above command will generate a `.java` file to the current directory.
 To run katpis using .NET Core SDK, the following command can be used:
 
 ```
-dotnet run
+dotnet run [args]
 ```
 
 You can pass any arguments, e.g. sub command and its arguments, after `dotnet run`
 
-To rebuild and restart the program every time the source code changes, use the following command:
+To rebuild and restart the program, every time the source code changes, use the following command:
 
 ```
-dotnet watch run
-```
-
-To interactively stage changes to git, use the following command:
-
-```
- git add -p
+dotnet watch run [args]
 ```
