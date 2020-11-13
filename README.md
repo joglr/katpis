@@ -1,7 +1,7 @@
 # Katpis - A Kattis CLI
 Katpis is a command-line interface for [kattis.com](https://www.kattis.com/)
 
-Allowing you to fetch sample files, test your program, and submit your solution all from your favorite commmand-line.
+Katpis allow you to fetch sample files, test your program, and submit your solution, all within your favorite commmand-line.
 
 Inspired by the official, but barebones CLI at [github.com/Kattis/kattis-cli](https://github.com/Kattis/kattis-cli)
 
