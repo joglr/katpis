@@ -205,7 +205,10 @@ namespace Katpis
         private static bool IsErrorStatus(int statusid)
         {
             return  statusid != 0 &&
-                    statusid != 3 && // TODO not sure about this one
+                    statusid != 1 &&
+                    statusid != 2 &&
+                    statusid != 3 &&
+                    statusid != 4 &&
                     statusid != 5 &&
                     statusid != 16;
         }
@@ -215,17 +218,33 @@ namespace Katpis
             switch (statusid)
             {
                 case 0:
+                    return "New".Cyan(); //invalid value
+                case 1:
+                    return "New".Cyan();
+                case 2:
                     return "New".Cyan();
                 case 3:
-                    return "Unknown status(Maybe quick accept / spam protection)";
+                    return "Compiling".Cyan();
+                case 4:
+                    return "Waiting for run".Cyan();
                 case 5:
                     return "Running".Cyan();
+                case 6:
+                    return "Judge Error".Red();
+                case 7:
+                    return "Submission Error".Red();
                 case 8:
                     return "Compile Error".Red();
                 case 9:
                     return "Runtime Error".Red();
+                case 10:
+                    return "Memory Limit Exceeded".Red();
+                case 11:
+                    return "Output Limit Exceeded".Red();
                 case 12:
                     return "Time Limit Exceeded".Red();
+                case 13:
+                    return "Illigal Function".Red();
                 case 14:
                     return "Wrong Answer".Red();
                 case 16:

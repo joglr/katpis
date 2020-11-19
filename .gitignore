@@ -1,5 +1,6 @@
 bin
 obj
+.ionide
 *.log
 .env
 .kattisrc
