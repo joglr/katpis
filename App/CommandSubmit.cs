@@ -65,7 +65,7 @@ namespace Katpis
                 { "user", configObject["user"]["username"]},
                 { "script", "true"},
                 { "token", configObject["user"]["token"]},
-                { "User-Agent", "kattis-cli-submit" },
+                { "User-Agent", "katpis-client" },
             };
             var content = new FormUrlEncodedContent(contentObject);
             HttpClient client = new HttpClient();
@@ -87,7 +87,7 @@ namespace Katpis
             form.Add(new ByteArrayContent(fileBytes, 0, fileBytes.Length), "sub_file[]", filename);
             form.Add(new StringContent(configObject["user"]["username"]), "user");
             form.Add(new StringContent(configObject["user"]["token"]), "token");
-            form.Add(new StringContent("kattis-cli-submit"), "User-Agent");
+            form.Add(new StringContent("katpis-client"), "User-Agent");
             form.Add(new StringContent("true"), "submit");
             form.Add(new StringContent("2"), "submit_ctr");
             form.Add(new StringContent(lang["." + filename.Split(".").Last()]), "language");
@@ -125,13 +125,13 @@ namespace Katpis
                 { "user", configObject["user"]["username"]},
                 { "script", "true"},
                 { "token", configObject["user"]["token"]},
-                { "User-Agent", "kattis-cli-submit" },
+                { "User-Agent", "katpis-client" },
             };
             content = new FormUrlEncodedContent(contentObject);
 
             int statusIdTracker = 0;
             int requestStatusCounter = 0;
-            while (statusIdTracker == 0 || statusIdTracker == 5) {
+            while (IsRunningStatus(statusIdTracker)) {
                 string statusurl = $"{submissionsurl}/{submissionid}?json";
                 HttpResponseMessage statusResponse = await client.PostAsync(statusurl, content);
                 string statusResponseString = await statusResponse.Content.ReadAsStringAsync();
@@ -202,6 +202,17 @@ namespace Katpis
         }
         }
 
+        private static bool IsRunningStatus(int statusid)
+        {
+            return  statusid == 0 ||
+                    statusid == 1 ||
+                    statusid == 2 ||
+                    statusid == 3 ||
+                    statusid == 4 ||
+                    statusid == 5 ||
+                    statusid == 16;
+        }
+
         private static bool IsErrorStatus(int statusid)
         {
             return  statusid != 0 &&
@@ -209,8 +220,7 @@ namespace Katpis
                     statusid != 2 &&
                     statusid != 3 &&
                     statusid != 4 &&
-                    statusid != 5 &&
-                    statusid != 16;
+                    statusid != 5;
         }
 
         private static string GetMessageFromStatusID(int statusid)
