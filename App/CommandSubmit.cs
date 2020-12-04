@@ -204,23 +204,12 @@ namespace Katpis
 
         private static bool IsRunningStatus(int statusid)
         {
-            return  statusid == 0 ||
-                    statusid == 1 ||
-                    statusid == 2 ||
-                    statusid == 3 ||
-                    statusid == 4 ||
-                    statusid == 5 ||
-                    statusid == 16;
+            return  statusid >= 0 && statusid <= 5;
         }
 
         private static bool IsErrorStatus(int statusid)
         {
-            return  statusid != 0 &&
-                    statusid != 1 &&
-                    statusid != 2 &&
-                    statusid != 3 &&
-                    statusid != 4 &&
-                    statusid != 5;
+            return  statusid >= 6 && statusid <= 14;
         }
 
         private static string GetMessageFromStatusID(int statusid)
@@ -228,9 +217,7 @@ namespace Katpis
             switch (statusid)
             {
                 case 0:
-                    return "New".Cyan(); //invalid value
                 case 1:
-                    return "New".Cyan();
                 case 2:
                     return "New".Cyan();
                 case 3:
