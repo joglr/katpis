@@ -26,7 +26,13 @@ namespace Katpis
                         if (args.Length == 2){
                             await CommandSubmit.RunSubmitAsync(args[1]);
                         } else {
-                            Console.WriteLine("submit takes 1 more argument, <filename>, e.g.: hello.java");
+                            Console.WriteLine(
+                                "Usage: " +
+                                "katpis submit <filename>".Bold().Blue() +
+                                "\n" +
+                                "Example: " +
+                                "$ katpis submit hello.java"
+                            );
                         }
                         break;
                     case "test":
@@ -38,7 +44,10 @@ namespace Katpis
                         } else {
                             Console.WriteLine(
                                 "Usage: " +
-                                "fetch <problem_id>".Bold().Blue()
+                                "katpis fetch <problem_id>".Bold().Blue() +
+                                "\n" +
+                                "Example: " +
+                                "$ katpis fetch twostones"
                             );
                         }
                         break;
@@ -46,7 +55,13 @@ namespace Katpis
                         if (args.Length == 2) {
                             CommandTemplate.RunTemplate(args[1]);
                         } else {
-                            Console.WriteLine("template takes 1 more argument, <filename>, e.g.: hello.java");
+                            Console.WriteLine(
+                                "Usage: " +
+                                "katpis template <filename>".Bold().Blue() +
+                                "\n" +
+                                "Example: " +
+                                "$ katpis template hello.java"
+                            );
                         }
                         break;
                     case "dir":
