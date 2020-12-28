@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 
-namespace Katpis
+namespace App
 {
     class CommandFetch
     {

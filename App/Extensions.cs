@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Katpis
+namespace App
 {
   public static class Extensions {
         public enum Style {

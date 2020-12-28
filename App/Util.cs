@@ -4,7 +4,7 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using static System.ConsoleColor;
 
-namespace Katpis
+namespace App
 {
   static class ConsoleUtils
   {

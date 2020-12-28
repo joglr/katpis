@@ -8,9 +8,9 @@ using System.IO.Compression;
 using System.Json;
 using System.Net.Http;
 using System.Threading;
-using static Katpis.ConsoleUtils;
+using static App.ConsoleUtils;
 
-namespace Katpis
+namespace App
 {
   class Program
     {

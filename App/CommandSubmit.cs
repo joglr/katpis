@@ -6,11 +6,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
-using static Katpis.ConsoleUtils;
+using static App.ConsoleUtils;
 
-namespace Katpis
+namespace App
 {
-    static class CommandSubmit
+    public static class CommandSubmit
     {
         private static Dictionary<string,string> lang = new Dictionary<string, string>{
             { ".c", "C" },
@@ -130,76 +130,93 @@ namespace Katpis
             content = new FormUrlEncodedContent(contentObject);
 
             int statusIdTracker = 0;
-            int requestStatusCounter = 0;
-            while (IsRunningStatus(statusIdTracker)) {
+            int printStatusCallCounter = 0;
+            while (IsRunningStatus(statusIdTracker))
+            {
                 string statusurl = $"{submissionsurl}/{submissionid}?json";
                 HttpResponseMessage statusResponse = await client.PostAsync(statusurl, content);
                 string statusResponseString = await statusResponse.Content.ReadAsStringAsync();
                 JsonValue status = JsonObject.Parse(statusResponseString);
+                int testCaseIndex = status["testcase_index"];
                 int statusId = (int)status["status_id"];
 
                 matchCollection = Regex.Matches(statusResponseString, @"Test case 1\\/(\d+): ");
                 bool numOfTestcasesIsKnown = matchCollection.Count > 0;
                 int numOfTestcases = 1; // 1 to avoid div by 0 exception
+                if (numOfTestcasesIsKnown) numOfTestcases = int.Parse(matchCollection[0].Groups[1].Value);
 
                 ClearCurrentConsoleLine();
-                Console.Write(
-                    "Status: " +
-                    GetMessageFromStatusID(statusId)
+                string fullStatusMessage = PrintStatus(
+                    printStatusCallCounter,
+                    statusId,
+                    numOfTestcasesIsKnown,
+                    numOfTestcases,
+                    testCaseIndex
                 );
 
-                if(!numOfTestcasesIsKnown) Console.Write(LoadingDots(requestStatusCounter));
-
-                if (numOfTestcasesIsKnown) {
-                    numOfTestcases = int.Parse(matchCollection[0].Groups[1].Value);
-
-                    string progressBar = "[";
-                    double acceptedFraction = status["testcase_index"] / (double)numOfTestcases;
-                    int progressBarLength = 25;
-                    
-                    // create boxes in progessbar
-                    bool hasPrintedOneErrorBox = false;
-                    for (int i = 0; i < progressBarLength; i++) {
-                        var currentFraction = i / (double)progressBarLength;
-                        if (currentFraction < acceptedFraction) {
-                            progressBar += "■".Green();
-                        } else {
-                            if(IsErrorStatus(statusId) && !hasPrintedOneErrorBox){
-                                progressBar += "■".Red();
-                                hasPrintedOneErrorBox = true;
-                            } else {
-                                progressBar += ".";
-                            }
-                        }
-                    }
-                    
-                    progressBar += "]";
-
-                    Console.Write(
-                        " " +
-                        progressBar +
-                        " case " +
-                        status["testcase_index"].ToString().Bold() +
-                        " of " +
-                        numOfTestcases.ToString().Bold()
-                    );
-                }
-
-                requestStatusCounter++;
+                printStatusCallCounter++;
                 statusIdTracker = statusId;
                 Thread.Sleep(500);
             }
+    }
+
+    public static string PrintStatus(int printStatusCallCounter, int statusId, bool numOfTestcasesIsKnown, int numOfTestcases, int testCaseIndex)
+    {
+        string fullStatusMessage = "Status: " + GetMessageFromStatusID(statusId);
+
+        if (numOfTestcasesIsKnown)
+        {
+            string progressBar = "[";
+            double acceptedFraction = testCaseIndex / (double)numOfTestcases;
+            int progressBarLength = 25;
+
+            // create boxes in progessbar
+            bool hasPrintedOneErrorBox = false;
+            for (int i = 0; i < progressBarLength; i++)
+            {
+                var currentFraction = i / (double)progressBarLength;
+                if (currentFraction < acceptedFraction)
+                {
+                    progressBar += "■".Green();
+                }
+                else
+                {
+                    if (IsErrorStatus(statusId) && !hasPrintedOneErrorBox)
+                    {
+                        progressBar += "■".Red();
+                        hasPrintedOneErrorBox = true;
+                    }
+                    else
+                    {
+                        progressBar += ".";
+                    }
+                }
+            }
+
+            progressBar += "]";
+
+            fullStatusMessage += " " +
+                progressBar +
+                " case " +
+                testCaseIndex.ToString().Bold() +
+                " of " +
+                numOfTestcases.ToString().Bold();
+        } else {
+            fullStatusMessage += LoadingDots(printStatusCallCounter);
         }
 
-        private static string LoadingDots(int requestStatusCounter)
+        return fullStatusMessage;
+    }
+
+    private static string LoadingDots(int printStatusCallCounter)
         {
-        if (requestStatusCounter % 3 == 2){
-            return "...";
-        } else if(requestStatusCounter % 3 == 1) {
-            return "..";
-        } else {
-            return ".";
-        }
+            if (printStatusCallCounter % 3 == 2){
+                return "...";
+            } else if(printStatusCallCounter % 3 == 1) {
+                return "..";
+            } else {
+                return ".";
+            }
         }
 
         private static bool IsRunningStatus(int statusid)

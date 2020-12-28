@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Katpis
+namespace App
 {
     static class CommandTest
     {
