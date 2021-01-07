@@ -25,7 +25,7 @@ We will provide installation instructions for these platforms in the near future
 ## Available commands
 ### katpis submit
 
-Submits a `.java` file from the current directory to Tattis with a matching name to a Kattis problem shortname.
+Submits a `.java` file from the current directory to Kattis with a matching name to a Kattis problem shortname.
 
 #### Usage
     katpis submit <filename-with-extension>
